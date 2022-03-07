@@ -1,0 +1,20 @@
+{
+  "name": "Top-System--ERP",
+  "version": "0.0.1",
+  "description": "Sistema de gerenciamento de estoque e vendas, ERP.",
+  "main": "index.js",
+  "author": "Monkeys LTDA",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "nodemon": "^2.0.13",
+    "pg": "^8.7.1",
+    "uuid": "^8.3.2"
+  },
+  "scripts": {
+    "start": "nodemon ./routes/main.js"
+  }
+}

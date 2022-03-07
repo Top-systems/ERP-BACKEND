@@ -1,0 +1,1023 @@
+const Utils = require('./use.js');
+const { useDB, useQuery } = Utils;
+
+const confirmaalteracaodataprescricao = async function ({ dataPrescricao, idReceita, idLoja }) {
+
+    const updateReceita = await useDB({
+        query: `UPDATE public.vd_receita SET  dataprescricao_rec='${dataPrescricao}' WHERE id_receita=${idReceita} and loja_fk=${idLoja}`
+    });
+
+    return { code: 200, results: { updateReceita } }
+
+};
+
+const confirmaalteracaodataanvisa = async function ({ dataAnvisa, dataAltera, usuarioAltera, idLoteMed, idLoja }) {
+
+    const updateCupomDetLoteMed = await useDB({
+        query: `update ecf_cupomdet_lotemed  set data_anvisa='${dataAnvisa}' ,dataaltera='${dataAltera}', usuarioaltera=${usuarioAltera} where id_cupomdet_lotemed=${idLoteMed} and loja_fk=${idLoja}`
+    });
+
+    return { code: 200, results: { updateCupomDetLoteMed } }
+
+};
+
+const confirmaalteracaodataanvisa2 = async function ({ dataAnvisa, dataAltera, usuarioAltera, idCompraMed, idLoja }) {
+
+    const updateCompraMedicamentoDet = await useDB({
+        query: `update fn_compra_medicamentodet set data_anvisa='${dataAnvisa}' ,dataaltera='${dataAltera}', usuarioaltera=${usuarioAltera} where id_compra_medicamentodet=${idCompraMed} and loja_fk=${idLoja}`
+    });
+
+    return { code: 200, results: { updateCompraMedicamentoDet } }
+
+};
+
+const confirmaalteracaodataanvisa2m1 = async function ({ dataAnvisa, dataAltera, usuarioAltera, idM1Med, idLoja, idNfeMed }) {
+
+    const updateM1MedicamentoDet = await useDB({
+        query: `update vd_m1_medicamentodet set data_anvisa='${dataAnvisa}' ,dataaltera='${dataAltera}', usuarioaltera=${usuarioAltera} where id_m1_medicamentodet=${idM1Med} and loja_fk=${idLoja}`
+    });
+
+    const updateNfeMedicamentoDet = await useDB({
+        query: `update nfe_medicamentodet set data_anvisa='${dataAnvisa}' ,dataaltera='${dataAltera}', usuarioaltera=${usuarioAltera} where id_nfe_medicamentodet=${idNfeMed} and loja_fk=${idLoja}`
+    });
+
+    return { code: 200, results: { updateM1MedicamentoDet, updateNfeMedicamentoDet } }
+
+};
+
+const abrirlotes = async function ({ idProd, idLoja }) {
+
+    const lote = await useDB({
+        query: `select Cd_Lote.* from Cd_Lote, cd_produto where produto_Fk=${idProd} and loja_fk=${idLoja} and cast(qtde_Lote as double precision)>0.00 and cd_produto.classeterapeutica_Prod!='0'`
+    })
+
+    return { code: 200, results: { lote } }
+
+};
+
+const atualizarLote = async function ({ idLote, idLoteMed, idLoja }) {
+
+    const updateCupomDetLoteMed = await useDB({
+        query: `update ecf_cupomdet_lotemed  set lote_fk=${idLote} where id_cupomdet_lotemed=${idLoteMed} and loja_fk=${idLoja}`
+    });
+
+    return { code: 200, results: { updateCupomDetLoteMed } }
+
+};
+
+const pegarUltimaDataAceita = async function ({ idLoja }) {
+
+    const arquivosAnvisa = await useDB({
+        query: `select * from Cd_Arquivosanvisa where loja_Fk=${idLoja} and situacao='A' order by id desc`
+    });
+
+    return { code: 200, results: { arquivosAnvisa } }
+
+};
+
+const listarArquivos = async function ({ idLoja }) {
+
+    const arquivoAnvisa = await useDB({
+        query: `select * from Cd_Arquivosanvisa where loja_Fk=${idLoja} order by id desc`
+    });
+
+    return { code: 200, results: { arquivoAnvisa } }
+
+};
+
+const atualizarArquivos = async function ({ idLoja }) {
+
+    const arquivosAnvisa = await useDB({
+        query: `select * from Cd_Arquivosanvisa * where loja_Fk=${idLoja} and situacao='T'`
+    });
+
+    return { code: 200, results: { arquivosAnvisa } }
+
+};
+
+const retornoAtualizarlistalotemed = async function ({ idLoja, idCompraMed, enviadoAnvisa, idCupomLote, idNfeMed, idM1Medicamento }) {
+
+    const compraMedicamentoDet = await useDB({
+        query: `select * from Fn_Compra_Medicamentodet where id_Compra_Medicamentodet=${idCompraMed}  and loja_Fk=${idLoja}`
+    });
+
+    const updateCupomDetLoteMed = await useDB({
+        query: `update ecf_cupomdet_lotemed  set enviado_anvisa='${enviadoAnvisa}' where id_cupomdet_lotemed=${idCupomLote} and loja_fk=${idLoja}`
+    });
+
+    const medicamentoDet = await useDB({
+        query: `select * from Nfe_Medicamentodet where id_Nfe_Medicamentodet=${idNfeMed}  and loja_Fk=${idLoja}`
+    });
+
+    const m1Medicamento = await useDB({
+        query: `select * from Vd_M1_Medicamentodet where id_M1_Medicamentodet=${idM1Medicamento}  and loja_Fk=${idLoja}`
+    });
+
+    return { code: 200, results: { compraMedicamentoDet, updateCupomDetLoteMed, medicamentoDet, m1Medicamento } }
+
+};
+
+const enviarArquivo = async function ({ idLoja }) {
+
+    const arquivoAnvisa = await useDB({
+        query: `select * from Cd_Arquivosanvisa where loja_Fk=${idLoja} order by id desc`
+    });
+
+    return { code: 200, results: { arquivoAnvisa } }
+
+};
+
+const atualizarlistalotemed = async function ({ idCompraMed, idLoja, idM1Med, idNfeMed, enviadoAnvisa, dataAltera, usuarioaltera, idCupomLote }) {
+
+    const compraMedicamentoDet = await useDB({
+        query: `select * from Fn_Compra_Medicamentodet where id_Compra_Medicamentodet=${idCompraMed}  and loja_Fk=${idLoja}`
+    });
+
+    const m1MedicamentoDet = await useDB({
+        query: `select * from Vd_M1_Medicamentodet where id_M1_Medicamentodet=${idM1Med}  and loja_Fk=${idLoja}`
+    });
+
+    const nfeMedicamentoDet = await useDB({
+        query: `select * from Nfe_Medicamentodet where id_Nfe_Medicamentodet=${idNfeMed}  and loja_Fk=${idLoja}`
+    });
+
+    const updateCupomDetLoteMed = await useDB({
+        query: `update ecf_cupomdet_lotemed  set enviado_anvisa='${enviadoAnvisa}' where id_cupomdet_lotemed=${idCupomLote} and loja_fk=${idLoja}`
+    });
+
+    return { code: 200, results: { compraMedicamentoDet, m1MedicamentoDet, nfeMedicamentoDet, updateCupomDetLoteMed } }
+
+};
+
+const gerarMovimentos = async function ({ idLoja }) {
+
+
+    const lote = await useDB({
+        query: `select qtde_Lote, cd_produto.registroms_Prod, cd_unidade.sigla_Unid,cd_produto.id_Prod,cd_produto.descricao_Prod,cd_produto.classeterapeutica_Prod,numero_Lote from Cd_Lote, cd_produto, cd_unidade where cd_lote.loja_fk=${idLoja}  and qtde_Lote > 0 and cd_produto.classeterapeutica_Prod!='0' and cd_lote.produto_fk = cd_produto.id_prod and cd_produto.unidade_fk = cd_unidade.id_unid`
+    });
+
+    return { code: 200, results: { lote } }
+
+};
+
+const consultarCompras2 = async function ({ idLoja, dataInicial, dataFinal }) {
+
+    const compraMediDet = await useDB({
+        query: `select 
+                qtdelote,
+                cd_produto.registroms_Prod,
+                cd_unidade.sigla_Unid,
+                cd_produto.id_Prod,
+                cd_produto.descricao_Prod,
+                cd_fornecedor.id_Forn,
+                cd_fornecedor.nome_Forn,
+                fn_Compra_Cabecalho.dataentradasaida_Compracab,
+                fn_Compra_Cabecalho.numerodocfiscal_Compracab,
+                cd_fornecedor.cpfcnpj_Forn,
+                cd_produto.classeterapeutica_Prod,
+                fn_compra_detalhe.id_Compradet,
+                cd_Lote.numero_Lote,
+                cd_produto.classeterapeutica_Prod,
+                fn_Compra_Cabecalho.dataentradasaida_Compracab,
+                fn_Compra_Cabecalho.id_Compracab,
+                fn_Compra_Medicamentodet.id_Compra_Medicamentodet,
+                data_anvisa 
+            from 
+                Fn_Compra_Medicamentodet,
+                fn_compra_detalhe,
+                cd_produto,
+                cd_fornecedor,
+                fn_compra_cabecalho,
+                cd_unidade,
+                cd_Lote
+            where 
+                Fn_Compra_Medicamentodet.loja_Fk=${idLoja}
+            and
+                fn_compra_detalhe.loja_Fk=${idLoja}
+            
+            and
+                fn_compra_cabecalho.loja_Fk=${idLoja}
+           
+            and 
+                cast(data_anvisa as date) BETWEEN '${dataInicial}'  and '${dataFinal}' 
+            and 
+                fn_Compra_Cabecalho.fornecedor_Fk is not null 
+            and 
+                cd_Lote is not null 
+            and
+                fn_compra_medicamentodet.compradet_fk = fn_compra_detalhe.id_compradet
+            and
+                fn_compra_medicamentodet.lote_fk = cd_lote.id_lote
+            and
+                fn_compra_detalhe.produto_fk = cd_produto.id_prod
+            and
+                cd_produto.unidade_fk = cd_unidade.id_unid
+            and
+                fn_compra_detalhe.compracab_fk = fn_compra_cabecalho.id_compracab
+            and
+                fn_compra_cabecalho.fornecedor_fk = cd_fornecedor.id_forn
+            order by 
+                data_anvisa desc`
+
+    });
+
+    return { code: 200, results: { compraMediDet } }
+
+};
+
+const consultarCompras = async function ({ idLoja, dataInicial, dataFinal, dataEntradaSaidaInical, dataEntradaSaidaFinal }) {
+
+    const compraMediDet = await useDB({
+        query: `select 
+                qtdelote,
+                cd_produto.registroms_Prod,
+                cd_unidade.sigla_Unid,
+                cd_produto.id_Prod,
+                cd_produto.descricao_Prod,
+                cd_fornecedor.id_Forn,
+                cd_fornecedor.nome_Forn,
+                fn_Compra_Cabecalho.dataentradasaida_Compracab,
+                fn_Compra_Cabecalho.numerodocfiscal_Compracab,
+                cd_fornecedor.cpfcnpj_Forn,
+                cd_produto.classeterapeutica_Prod,
+                fn_compra_detalhe.id_Compradet,
+                cd_Lote.numero_Lote,
+                cd_produto.classeterapeutica_Prod,
+                fn_Compra_Cabecalho.dataentradasaida_Compracab,
+                fn_Compra_Cabecalho.id_Compracab,
+                fn_Compra_Medicamentodet.id_Compra_Medicamentodet,
+                data_anvisa 
+            from 
+                Fn_Compra_Medicamentodet,
+                fn_compra_detalhe,
+                cd_produto,
+                cd_fornecedor,
+                fn_compra_cabecalho,
+                cd_unidade,
+                cd_Lote
+            where 
+                Fn_Compra_Medicamentodet.loja_Fk=${idLoja}
+            and
+                fn_compra_detalhe.loja_Fk=${idLoja}
+            
+            and
+                fn_compra_cabecalho.loja_Fk=${idLoja}
+            and
+                ((CAST(fn_compra_cabecalho.dataentradasaida_compracab as date) BETWEEN '${dataEntradaSaidaInical}' and '${dataEntradaSaidaFinal}')
+           
+            and 
+                cast(data_anvisa as date) BETWEEN '${dataInicial}'  and '${dataFinal}' 
+            and 
+                fn_Compra_Cabecalho.fornecedor_Fk is not null 
+            and 
+                cd_Lote is not null 
+            and
+                fn_compra_medicamentodet.compradet_fk = fn_compra_detalhe.id_compradet
+            and
+                fn_compra_medicamentodet.lote_fk = cd_lote.id_lote
+            and
+                fn_compra_detalhe.produto_fk = cd_produto.id_prod
+            and
+                cd_produto.unidade_fk = cd_unidade.id_unid
+            and
+                fn_compra_detalhe.compracab_fk = fn_compra_cabecalho.id_compracab
+            and
+                fn_compra_cabecalho.fornecedor_fk = cd_fornecedor.id_forn
+            order by 
+                data_anvisa desc`
+
+    });
+
+    return { code: 200, results: { compraMediDet } }
+
+};
+
+const consultarCupons = async function ({ idLoja, dataInicial, dataFinal }) {
+
+    const cupomLoteMed = await useDB({
+        query: `select 
+                vd_Receita.tipo_Rec,
+                vd_Receita.numnotifica_Rec,
+                vd_Receita.dataprescricao_Rec,
+                vd_Receita.usomedicamento_Rec,
+                vd_Receita.nomepaciente_Rec,
+                vd_Receita.idadepaciente_Rec,
+                vd_Receita.sexopaciente_Rec,
+                vd_Receita.numdoc_Rec,
+                ecf_Cupomdet_Prod.id_Cupomdet_Prod,
+                cd_produto.registroms_Prod,
+                cd_unidade.sigla_Unid,
+                cd_produto.usucontinuo_Prod,
+                cd_produto.descricao_Prod,
+                qtdevendida_Lotemed,
+                cd_Lote.numero_Lote,
+                cd_profsaude.nome_Prof,
+                cd_profsaude.registro_Prof,
+                cd_profsaude.conselho_Prof,
+                cd_profsaude.ufregistro_Prof,
+                vd_Receita.tipodoc_Rec,
+                vd_Receita.orgaoexp_Rec,
+                vd_Receita.ufexp_Rec,
+                vd_Receita.unidadeidade_Rec, 
+                ecf_Cupomcab.datahora_Cupom,
+                cd_produto.classeterapeutica_Prod, 
+                ecf_Cupomdet_Lotemed.id_Cupomdet_Lotemed,
+                cd_produto.id_Prod,
+                cd_Lote.id_Lote,
+                data_anvisa,
+                vd_Receita.id_Receita 
+            from 
+                Ecf_Cupomdet_Lotemed,
+                vd_receita,
+                ecf_cupomdet_prod,
+                cd_produto,
+                cd_unidade,
+                cd_profsaude,
+                ecf_cupomcab,
+                cd_lote
+            where 
+                ecf_Cupomdet_Prod.loja_fk=${idLoja}  
+            and 
+                cast(data_anvisa as date) BETWEEN '${dataInicial}'  and '${dataFinal}' 
+            and 
+                vd_Receita.statusvenda_Rec='F'  
+            and 
+                ecf_Cupomdet_Prod.receita_fk is not null 
+            and 
+                cd_produto.classeterapeutica_Prod!='0'  
+            and 
+                data_anvisa is not null 
+            and
+                ecf_cupomdet_lotemed.produto_fk = cd_produto.id_prod
+            and
+                ecf_cupomdet_lotemed.cupomdet_fk = ecf_cupomdet_prod.id_cupomdet_prod
+            and
+                ecf_cupomdet_prod.receita_fk = vd_receita.id_receita
+            and
+                vd_receita.profsaude_fk = cd_profsaude.id_profsaude
+            and
+                ecf_cupomdet_prod.cupomcab_fk = ecf_cupomcab.id_cupomcab
+            and 
+                cd_produto.unidade_fk = cd_unidade.id_unid
+            and
+                ecf_cupomdet_lotemed.lote_fk = cd_lote.id_lote 
+            order by 
+                data_anvisa  desc`
+    });
+
+    return { code: 200, results: { cupomLoteMed } }
+
+};
+
+const consultarM1 = async function ({ idLoja, dataAnvisaInicial, dataAnvisaFinal, dataFinal, dataInicial }) {
+
+    const m1MedicamentoDet = await useDB({
+        query: `select 
+                vd_M1_Detalhe.qtde_M1,
+                cd_produto.registroms_Prod,
+                cd_unidade.sigla_Unid,
+                cd_produto.id_Prod,
+                cd_produto.descricao_Prod,
+                cd_cliente.id_Cli,
+                cd_cliente.nome_Cli,
+                vd_m1.datalanc,
+                vd_m1.numdoc,
+                cd_cliente.cpfcnpj_Cli,
+                cd_Produto.classeterapeutica_Prod,
+                vd_M1_Detalhe.id_M1_Detalhe,
+                cd_Lote.numero_Lote,
+                cd_produto.classeterapeutica_Prod,
+                vd_M1.datalanc,
+                vd_M1.id_M1,
+                id_M1_Medicamentodet,
+                data_anvisa 
+            from 
+                Vd_M1_Medicamentodet ,
+                vd_m1_detalhe,
+                cd_produto,
+                cd_unidade,
+                vd_m1,
+                cd_cliente,
+                cd_lote
+            where 
+                vd_M1_Detalhe.loja_fk=${idLoja}  
+            and 
+                ((cast(vd_M1.datalanc as date) BETWEEN '${dataInicial}'  and '${dataFinal}')  
+            or 
+                (cast(data_anvisa as date) BETWEEN '${dataAnvisaInicial}'  and '${dataAnvisaFinal}')) 
+            and 
+                vd_M1.cliente_Fk is not null 
+            and 
+                vd_M1.tipooperacao='4' 
+            and 
+                vd_M1.situacao=1  
+            and
+                vd_M1_medicamentodet.m1det_fk = vd_m1_detalhe.id_m1_detalhe
+            and
+                vd_m1_detalhe.produto_fk = cd_produto.id_prod
+            and
+                cd_produto.unidade_fk = cd_unidade.id_unid
+            and
+                vd_m1_detalhe.m1_fk = vd_m1.id_m1
+            and
+                vd_m1.cliente_fk = cd_cliente.id_cli
+            and
+                vd_m1_medicamentodet.lote_fk = cd_lote.id_lote
+            order by 
+                vd_M1.datalanc desc`
+    });
+
+    return { code: 200, results: { m1MedicamentoDet } }
+
+};
+
+const consultarM1Perda = async function ({ idLoja, dataAnvisaInicial, dataAnvisaFinal, dataFinal, dataInicial }) {
+
+    const m1MedicamentoDet = await useDB({
+        query: `select 
+                qtdelote,
+                cd_produto.registroms_Prod,
+                cd_unidade.sigla_Unid,
+                cd_produto.id_Prod,
+                cd_produto.descricao_Prod,
+                cf_loja.id_loja,
+                cf_loja.nome_loja,
+                vd_m1.datalanc,
+                vd_m1.numdoc,
+                cd_Produto.classeterapeutica_Prod,
+                vd_M1_Detalhe.id_M1_Detalhe,
+                cd_Lote.numero_Lote,
+                cd_produto.classeterapeutica_Prod,
+                vd_M1.datalanc,
+                vd_M1.id_M1,
+                id_M1_Medicamentodet,
+                vd_m1.motivo,
+                data_anvisa 
+            from 
+                Vd_M1_Medicamentodet ,
+                vd_m1_detalhe,
+                cd_produto,
+                cd_unidade,
+                vd_m1,
+                cf_loja,
+                cd_lote
+            where 
+                vd_M1_Detalhe.loja_fk=${idLoja}  
+            and 
+                ((cast(vd_M1.datalanc as date) BETWEEN '${dataInicial}'  and '${dataFinal}')  
+            or 
+                (cast(data_anvisa as date) BETWEEN '${dataAnvisaInicial}'  and '${dataAnvisaFinal}')) 
+            
+            and 
+                vd_M1.tipooperacao='8' 
+            and 
+                vd_M1.situacao=1  
+            and
+                vd_M1_medicamentodet.m1det_fk = vd_m1_detalhe.id_m1_detalhe
+            and
+                vd_m1_detalhe.produto_fk = cd_produto.id_prod
+            and
+                cd_produto.unidade_fk = cd_unidade.id_unid
+            and
+                vd_m1_detalhe.m1_fk = vd_m1.id_m1
+            and
+                vd_m1.loja_fk = cf_loja.id_loja
+            and
+                vd_m1_medicamentodet.lote_fk = cd_lote.id_lote
+            order by 
+                vd_M1.datalanc desc`
+    });
+
+    return { code: 200, results: { m1MedicamentoDet } }
+
+};
+
+const consultarM1Loja = async function ({ idLoja, dataAnvisaInicial, dataAnvisaFinal, dataFinal, dataInicial }) {
+
+    const m1MedicamentoDet = await useDB({
+        query: `select 
+                vd_M1_Detalhe.qtde_M1,
+                cd_produto.registroms_Prod,
+                cd_unidade.sigla_Unid,
+                cd_produto.id_Prod,
+                cd_produto.descricao_Prod,
+                cf_loja.id_loja,
+                cf_loja.nome_loja,
+                vd_m1.datalanc,
+                vd_m1.numdoc,
+                cf_loja.cnpj_loja,
+                cd_Produto.classeterapeutica_Prod,
+                vd_M1_Detalhe.id_M1_Detalhe,
+                cd_Lote.numero_Lote,
+                cd_produto.classeterapeutica_Prod,
+                vd_M1.datalanc,
+                vd_M1.id_M1,
+                id_M1_Medicamentodet,
+                data_anvisa 
+            from 
+                Vd_M1_Medicamentodet ,
+                vd_m1_detalhe,
+                cd_produto,
+                cd_unidade,
+                vd_m1,
+                cf_loja,
+                cd_lote
+            where 
+                vd_M1_Detalhe.loja_fk=${idLoja}  
+            and 
+                ((cast(vd_M1.datalanc as date) BETWEEN '${dataInicial}'  and '${dataFinal}')  
+            or 
+                (cast(data_anvisa as date) BETWEEN '${dataAnvisaInicial}'  and '${dataAnvisaFinal}')) 
+            and 
+                vd_M1.cliente_Fk is not null 
+            and 
+                vd_M1.tipooperacao='4' 
+            and 
+                vd_M1.situacao=1  
+            and
+                vd_M1_medicamentodet.m1det_fk = vd_m1_detalhe.id_m1_detalhe
+            and
+                vd_m1_detalhe.produto_fk = cd_produto.id_prod
+            and
+                cd_produto.unidade_fk = cd_unidade.id_unid
+            and
+                vd_m1_detalhe.m1_fk = vd_m1.id_m1
+            and
+                vd_m1.loja_fk = cf_loja.id_loja
+            and
+                vd_m1_medicamentodet.lote_fk = cd_lote.id_lote
+            order by 
+                vd_M1.datalanc desc`
+    });
+
+    return { code: 200, results: { m1MedicamentoDet } }
+
+};
+
+const consultarM1Devolucao = async function ({ idLoja, dataAnvisaInicial, dataAnvisaFinal, dataFinal, dataInicial }) {
+
+    const m1MedicamentoDet = await useDB({
+        query: `select 
+                vd_M1_Detalhe.qtde_M1,
+                cd_produto.registroms_Prod,
+                cd_unidade.sigla_Unid,
+                cd_produto.id_Prod,
+                cd_produto.descricao_Prod,
+                cd_fornecedor.id_forn,
+                cd_fornecedor.nome_forn,
+                vd_m1.datalanc,
+                vd_m1.numdoc,
+                cd_fornecedor.cpfcnpj_forn,
+                cd_Produto.classeterapeutica_Prod,
+                vd_M1_Detalhe.id_M1_Detalhe,
+                cd_Lote.numero_Lote,
+                cd_produto.classeterapeutica_Prod,
+                vd_M1.datalanc,
+                vd_M1.id_M1,
+                id_M1_Medicamentodet,
+                data_anvisa 
+            from 
+                Vd_M1_Medicamentodet ,
+                vd_m1_detalhe,
+                cd_produto,
+                cd_unidade,
+                vd_m1,
+                cd_fornecedor,
+                cd_lote
+            where 
+                vd_M1_Detalhe.loja_fk=${idLoja}  
+            and 
+                ((cast(vd_M1.datalanc as date) BETWEEN '${dataInicial}'  and '${dataFinal}')  
+            or 
+                (cast(data_anvisa as date) BETWEEN '${dataAnvisaInicial}'  and '${dataAnvisaFinal}')) 
+            and 
+                vd_M1.cliente_Fk is not null 
+            and 
+                vd_M1.tipooperacao='4' 
+            and 
+                vd_M1.situacao=1  
+            and
+                vd_M1_medicamentodet.m1det_fk = vd_m1_detalhe.id_m1_detalhe
+            and
+                vd_m1_detalhe.produto_fk = cd_produto.id_prod
+            and
+                cd_produto.unidade_fk = cd_unidade.id_unid
+            and
+                vd_m1_detalhe.m1_fk = vd_m1.id_m1
+            and
+                vd_m1.fornecedor_fk = cd_fornecedor.id_forn
+            and
+                vd_m1_medicamentodet.lote_fk = cd_lote.id_lote
+            order by 
+                vd_M1.datalanc desc`
+    });
+
+    return { code: 200, results: { m1MedicamentoDet } }
+
+};
+
+const consultarNFE = async function ({ idLoja, dataInicial, dataFinal }) {
+
+    const medicamentoDet = await useDB({
+        query: `select 
+                qtdelote,
+                cd_produto.registroms_Prod,
+                cd_unidade.sigla_Unid,
+                cd_produto.id_Prod,
+                cd_produto.descricao_Prod,
+                cd_cliente.id_Cli,
+                cd_cliente.nome_Cli,
+                nfe_Cabecalho.dataentradasaida_Nfecab,
+                nfe_Cabecalho.numerodocfiscal_Nfecab,
+                cd_cliente.cpfcnpj_Cli,
+                cd_produto.classeterapeutica_Prod,
+                nfe_Detalhe.id_Nfedetalhe,
+                cd_Lote.numero_Lote,
+                cd_produto.classeterapeutica_Prod,
+                nfe_Cabecalho.dataentradasaida_Nfecab,
+                nfe_Cabecalho.id_Nfe_Cabecalho,
+                id_Nfe_Medicamentodet 
+            from 
+                Nfe_Medicamentodet,
+                cd_produto,
+                cd_cliente,
+                nfe_cabecalho,
+                cd_lote,
+                nfe_detalhe ,
+                cd_unidade
+            where 
+                nfe_Detalhe.loja_fk=${idLoja}  
+            and 
+                cast(nfe_Cabecalho.dataentradasaida_Nfecab as date) BETWEEN '${dataInicial}'  and '${dataFinal}' 
+            and 
+                nfe_Cabecalho.cliente_Fk is not null 
+            and 
+                LENGTH(cd_cliente.cpfcnpj_Cli)='14' 
+            and 
+                nfe_Cabecalho.tipooperacao_Nfecab='4' 
+            and 
+                nfe_Cabecalho.statusnota_Nfecab='5' 
+            and
+                nfe_medicamentodet.nfedet_fk = nfe_detalhe.id_nfedetalhe
+            and
+                nfe_detalhe.produto_fk = cd_produto.id_prod
+            and 
+                cd_produto.unidade_fk = cd_unidade.id_unid
+            and
+                nfe_detalhe.nfecab_fk = nfe_cabecalho.id_nfe_cabecalho
+            and
+                nfe_cabecalho.cliente_fk = cd_cliente.id_cli
+            and
+                nfe_medicamentodet.lote_fk = cd_lote.id_lote
+            order by 
+                nfe_Cabecalho.dataentradasaida_Nfecab desc`
+    });
+
+    return { code: 200, results: { medicamentoDet } }
+
+};
+
+const consultarNFELoja = async function ({ idLoja, dataInicial, dataFinal }) {
+
+    const medicamentoDet = await useDB({
+        query: `select 
+                qtdelote,
+                cd_produto.registroms_Prod,
+                cd_unidade.sigla_Unid,
+                cd_produto.id_Prod,
+                cd_produto.descricao_Prod,
+                cf_loja.id_loja,
+                cf_loja.nome_loja,
+                nfe_Cabecalho.dataentradasaida_Nfecab,
+                nfe_Cabecalho.numerodocfiscal_Nfecab,
+                cf_loja.cnpj_loja,
+                cd_produto.classeterapeutica_Prod,
+                nfe_Detalhe.id_Nfedetalhe,
+                cd_Lote.numero_Lote,
+                cd_produto.classeterapeutica_Prod,
+                nfe_Cabecalho.dataentradasaida_Nfecab,
+                nfe_Cabecalho.id_Nfe_Cabecalho,
+                id_Nfe_Medicamentodet 
+            from 
+                Nfe_Medicamentodet,
+                cd_produto,
+                cf_loja,
+                nfe_cabecalho,
+                cd_lote,
+                nfe_detalhe ,
+                cd_unidade
+            where 
+                nfe_Detalhe.loja_fk=${idLoja}  
+            and 
+                cast(nfe_Cabecalho.dataentradasaida_Nfecab as date) BETWEEN '${dataInicial}'  and '${dataFinal}' 
+            and 
+                nfe_cabecalho.lojatransferencia_fk is not null
+            and 
+                nfe_Cabecalho.tipooperacao_Nfecab='4' 
+            and 
+                nfe_Cabecalho.statusnota_Nfecab='5' 
+            and
+                nfe_medicamentodet.nfedet_fk = nfe_detalhe.id_nfedetalhe
+            and
+                nfe_detalhe.produto_fk = cd_produto.id_prod
+            and 
+                cd_produto.unidade_fk = cd_unidade.id_unid
+            and
+                nfe_detalhe.nfecab_fk = nfe_cabecalho.id_nfe_cabecalho
+            and
+                nfe_cabecalho.lojatransferencia_fk = cf_loja.id_loja
+            and
+                nfe_medicamentodet.lote_fk = cd_lote.id_lote
+            order by 
+                nfe_Cabecalho.dataentradasaida_Nfecab desc`
+    });
+
+    return { code: 200, results: { medicamentoDet } }
+
+};
+
+const consultarNFEDevolucao = async function ({ idLoja, dataInicial, dataFinal }) {
+
+    const medicamentoDet = await useDB({
+        query: `select 
+                qtdelote,
+                cd_produto.registroms_Prod,
+                cd_unidade.sigla_Unid,
+                cd_produto.id_Prod,
+                cd_produto.descricao_Prod,
+                cd_fornecedor.id_forn,
+                cd_fornecedor.nome_forn,
+                nfe_Cabecalho.dataentradasaida_Nfecab,
+                nfe_Cabecalho.numerodocfiscal_Nfecab,
+                cd_fornecedor.cpfcnpj_forn,
+                cd_produto.classeterapeutica_Prod,
+                nfe_Detalhe.id_Nfedetalhe,
+                cd_Lote.numero_Lote,
+                cd_produto.classeterapeutica_Prod,
+                nfe_Cabecalho.dataentradasaida_Nfecab,
+                nfe_Cabecalho.id_Nfe_Cabecalho,
+                id_Nfe_Medicamentodet 
+            from 
+                Nfe_Medicamentodet,
+                cd_produto,
+                cd_fornecedor,
+                nfe_cabecalho,
+                cd_lote,
+                nfe_detalhe ,
+                cd_unidade
+            where 
+                nfe_Detalhe.loja_fk=${idLoja}  
+            and 
+                cast(nfe_Cabecalho.dataentradasaida_Nfecab as date) BETWEEN '${dataInicial}'  and '${dataFinal}' 
+            and 
+                nfe_cabecalho.fornecedor_fk is not null
+            and 
+                nfe_Cabecalho.tipooperacao_Nfecab='4' 
+            and 
+                nfe_Cabecalho.statusnota_Nfecab='5' 
+            and
+                nfe_medicamentodet.nfedet_fk = nfe_detalhe.id_nfedetalhe
+            and
+                nfe_detalhe.produto_fk = cd_produto.id_prod
+            and 
+                cd_produto.unidade_fk = cd_unidade.id_unid
+            and
+                nfe_detalhe.nfecab_fk = nfe_cabecalho.id_nfe_cabecalho
+            and
+                nfe_cabecalho.fornecedor_fk = cd_fornecedor.id_forn
+            and
+                nfe_medicamentodet.lote_fk = cd_lote.id_lote
+            order by 
+                nfe_Cabecalho.dataentradasaida_Nfecab desc`
+    });
+
+    return { code: 200, results: { medicamentoDet } }
+
+};
+
+const consultarNFEDevolucaocli = async function ({ idLoja, dataInicial, dataFinal, dataAnvisaInicial, dataAnvisaFinal }) {
+
+    const medicamentoDet = await useDB({
+        query: `select 
+                qtdelote,
+                cd_produto.registroms_Prod,
+                cd_unidade.sigla_Unid,
+                cd_produto.id_Prod,
+                cd_produto.descricao_Prod,
+                cd_cliente.id_Cli,
+                cd_cliente.nome_Cli,
+                nfe_Cabecalho.dataentradasaida_Nfecab,
+                nfe_Cabecalho.numerodocfiscal_Nfecab,
+                cd_cliente.cpfcnpj_Cli,
+                cd_produto.classeterapeutica_Prod,
+                nfe_Detalhe.id_Nfedetalhe,
+                cd_Lote.numero_Lote,
+                cd_produto.classeterapeutica_Prod,
+                nfe_Cabecalho.dataentradasaida_Nfecab,
+                nfe_Cabecalho.id_Nfe_Cabecalho,
+                id_Nfe_Medicamentodet 
+            from 
+                Nfe_Medicamentodet,
+                cd_produto,
+                cd_cliente,
+                nfe_cabecalho,
+                cd_lote,
+                nfe_detalhe ,
+                cd_unidade
+            where 
+                nfe_Detalhe.loja_fk=${idLoja}  
+            and 
+                ((cast(nfe_Cabecalho.dataentradasaida_Nfecab as date) BETWEEN '${dataInicial}'  and '${dataFinal}')
+            or
+                (cast(data_anvisa as date) BETWEEN  '${dataAnvisaInicial}' and '${dataAnvisaFinal}'))
+            and 
+                nfe_Cabecalho.cliente_Fk is not null 
+            and 
+                LENGTH(cd_cliente.cpfcnpj_Cli)='14' 
+            and 
+                nfe_Cabecalho.tipooperacao_Nfecab='4' 
+            and 
+                nfe_Cabecalho.statusnota_Nfecab='5' 
+            and
+                nfe_medicamentodet.nfedet_fk = nfe_detalhe.id_nfedetalhe
+            and
+                nfe_detalhe.produto_fk = cd_produto.id_prod
+            and 
+                cd_produto.unidade_fk = cd_unidade.id_unid
+            and
+                nfe_detalhe.nfecab_fk = nfe_cabecalho.id_nfe_cabecalho
+            and
+                nfe_cabecalho.cliente_fk = cd_cliente.id_cli
+            and
+                nfe_medicamentodet.lote_fk = cd_lote.id_lote
+            order by 
+                nfe_Cabecalho.dataentradasaida_Nfecab desc`
+    });
+
+    return { code: 200, results: { medicamentoDet } }
+
+};
+
+const consultarNFETransferencia = async function ({ idLoja, dataInicial, dataFinal }) {
+
+    const medicamentoDet = await useDB({
+        query: `select 
+                qtdelote,
+                cd_produto.registroms_Prod,
+                cd_unidade.sigla_Unid,
+                cd_produto.id_Prod,
+                cd_produto.descricao_Prod,
+                cf_loja.id_loja,
+                cf_loja.nome_loja,
+                nfe_Cabecalho.dataentradasaida_Nfecab,
+                nfe_Cabecalho.numerodocfiscal_Nfecab,
+                cf_loja.cnpj_loja,
+                cd_produto.classeterapeutica_Prod,
+                nfe_Detalhe.id_Nfedetalhe,
+                cd_Lote.numero_Lote,
+                cd_produto.classeterapeutica_Prod,
+                nfe_Cabecalho.dataentradasaida_Nfecab,
+                nfe_Cabecalho.id_Nfe_Cabecalho,
+                id_Nfe_Medicamentodet 
+            from 
+                Nfe_Medicamentodet,
+                cd_produto,
+                cf_loja,
+                nfe_cabecalho,
+                cd_lote,
+                nfe_detalhe ,
+                cd_unidade
+            where 
+                nfe_Detalhe.loja_fk=${idLoja}  
+             and 
+                (cast(nfe_Cabecalho.dataentradasaida_Nfecab as date) BETWEEN '${dataInicial}'  and '${dataFinal}')
+            and
+                nfe_cabecalho.lojatransferencia_fk is not null
+            and 
+                nfe_Cabecalho.tipooperacao_Nfecab='3' 
+            and 
+                nfe_Cabecalho.statusnota_Nfecab='5' 
+            and
+                nfe_medicamentodet.nfedet_fk = nfe_detalhe.id_nfedetalhe
+            and
+                nfe_detalhe.produto_fk = cd_produto.id_prod
+            and 
+                cd_produto.unidade_fk = cd_unidade.id_unid
+            and
+                nfe_detalhe.nfecab_fk = nfe_cabecalho.id_nfe_cabecalho
+            and
+                nfe_cabecalho.lojatransferencia_fk = cf_loja.id_loja
+            and
+                nfe_medicamentodet.lote_fk = cd_lote.id_lote
+            order by 
+                nfe_Cabecalho.dataentradasaida_Nfecab desc`
+    });
+
+    return { code: 200, results: { medicamentoDet } }
+
+};
+
+const consultarNFEPerda = async function ({ idLoja, dataInicial, dataFinal, dataAnvisaInicial, dataAnvisaFinal }) {
+
+    const medicamentoDet = await useDB({
+        query: `select 
+                qtdelote,
+                cd_produto.registroms_Prod,
+                cd_unidade.sigla_Unid,
+                cd_produto.id_Prod,
+                cd_produto.descricao_Prod,
+                cf_loja.id_loja,
+                cf_loja.nome_loja,
+                nfe_Cabecalho.dataentradasaida_Nfecab,
+                nfe_Cabecalho.numerodocfiscal_Nfecab,
+                cf_loja.cnpj_loja,
+                cd_produto.classeterapeutica_Prod,
+                nfe_Detalhe.id_Nfedetalhe,
+                cd_Lote.numero_Lote,
+                cd_produto.classeterapeutica_Prod,
+                nfe_Cabecalho.dataentradasaida_Nfecab,
+                nfe_Cabecalho.id_Nfe_Cabecalho,
+                id_Nfe_Medicamentodet 
+            from 
+                Nfe_Medicamentodet,
+                cd_produto,
+                cf_loja,
+                nfe_cabecalho,
+                cd_lote,
+                nfe_detalhe ,
+                cd_unidade
+            where 
+                nfe_Detalhe.loja_fk=${idLoja}  
+                and 
+                ((cast(nfe_Cabecalho.dataentradasaida_Nfecab as date) BETWEEN '${dataInicial}'  and '${dataFinal}')
+            or
+                (cast(data_anvisa as date) BETWEEN  '${dataAnvisaInicial}' and '${dataAnvisaFinal}'))
+            and 
+                nfe_cabecalho.lojatransferencia_fk is not null
+            and 
+                nfe_Cabecalho.tipooperacao_Nfecab='8' 
+            and 
+                nfe_Cabecalho.statusnota_Nfecab='5' 
+            and
+                nfe_medicamentodet.nfedet_fk = nfe_detalhe.id_nfedetalhe
+            and
+                nfe_detalhe.produto_fk = cd_produto.id_prod
+            and 
+                cd_produto.unidade_fk = cd_unidade.id_unid
+            and
+                nfe_detalhe.nfecab_fk = nfe_cabecalho.id_nfe_cabecalho
+            and
+                nfe_cabecalho.lojatransferencia_fk = cf_loja.id_loja
+            and
+                nfe_medicamentodet.lote_fk = cd_lote.id_lote
+            order by 
+                nfe_Cabecalho.dataentradasaida_Nfecab desc`
+    });
+
+    return { code: 200, results: { medicamentoDet } }
+
+};
+
+const confirmaalteracaodataanvisa2m1d = async function ({ dataAnvisa, dataAltera, usuarioAltera, idM1Med, idLoja, idNfeMed }) {
+
+    const updateM1MedicamentoDet = await useDB({
+        query: `update vd_m1_medicamentodet set data_anvisa='${dataAnvisa}' ,dataaltera='${dataAltera}', usuarioaltera=${usuarioAltera} where id_m1_medicamentodet=${idM1Med} and loja_fk=${idLoja}`
+    });
+
+    const updateNfeMedicamentoDet = await useDB({
+        query: `update nfe_medicamentodet set data_anvisa='${dataAnvisa}' ,dataaltera='${dataAltera}', usuarioaltera=${usuarioAltera} where id_nfe_medicamentodet=${idNfeMed} and loja_fk=${idLoja}`
+    });
+
+    return { code: 200, results: { updateM1MedicamentoDet, updateNfeMedicamentoDet } }
+
+};
+
+module.exports = {
+    confirmaalteracaodataprescricao,
+    confirmaalteracaodataanvisa,
+    confirmaalteracaodataanvisa2,
+    confirmaalteracaodataanvisa2m1,
+    abrirlotes,
+    atualizarLote,
+    pegarUltimaDataAceita,
+    listarArquivos,
+    atualizarArquivos,
+    retornoAtualizarlistalotemed,
+    enviarArquivo,
+    atualizarlistalotemed,
+    gerarMovimentos,
+    consultarCompras2,
+    consultarCompras,
+    consultarCupons,
+    consultarM1,
+    consultarM1Perda,
+    consultarM1Loja,
+    consultarM1Devolucao,
+    consultarNFE,
+    consultarNFELoja,
+    consultarNFEDevolucao,
+    consultarNFEDevolucaocli,
+    consultarNFETransferencia,
+    consultarNFEPerda,
+    confirmaalteracaodataanvisa2m1d
+}
